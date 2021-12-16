@@ -13,7 +13,32 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
 
     /// Image view to hold the image
     public let imageView = UIImageView()
-
+    
+    /// To better see text
+    public lazy var imageOverlay: UIView = {
+        let view = UIView()
+        view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        view.backgroundColor = .black
+        view.alpha = 0.15
+        
+        return view
+    }()
+    
+    public lazy var label: UITextView = {
+        let label = UITextView()
+        label.font = UIFont.systemFont(ofSize: 38, weight: .bold)
+        label.textColor = .white
+        label.textAlignment = .center
+        label.isUserInteractionEnabled = false
+        label.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        label.backgroundColor = .clear
+        label.isEditable = false
+        label.isUserInteractionEnabled = false
+        label.isSelectable = false
+   
+        return label
+    }()
+    
     /// Activity indicator shown during image loading, when nil there won't be shown any
     public let activityIndicator: ActivityIndicatorView?
 
@@ -65,10 +90,10 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
         imageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         imageView.isAccessibilityElement = true
         imageView.accessibilityTraits = .image
+        imageView.addSubview(imageOverlay)
         if #available(iOS 11.0, *) {
             imageView.accessibilityIgnoresInvertColors = true
         }
-
         imageViewWrapper.clipsToBounds = true
         imageViewWrapper.isUserInteractionEnabled = true
         if UIApplication.shared.userInterfaceLayoutDirection == .rightToLeft {
@@ -88,7 +113,7 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
         if let activityIndicator = activityIndicator {
             addSubview(activityIndicator.view)
         }
-
+        addSubview(label)
         // tap gesture recognizer
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(ImageSlideshowItem.tapZoom))
         tapRecognizer.numberOfTapsRequired = 2
@@ -121,6 +146,7 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
         }
 
         self.activityIndicator?.view.center = imageViewWrapper.center
+        self.label.center = imageView.center
 
         // if self.frame was changed and zoomInInitially enabled, zoom in
         if lastFrame != frame && zoomInInitially {
@@ -131,6 +157,9 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
 
         contentSize = imageViewWrapper.frame.size
         maximumZoomScale = calculateMaximumScale()
+        
+        label.centerVerticalText()
+        imageOverlay.isHidden = label.text.isEmpty
     }
 
     /// Request to load Image Source to Image View
@@ -237,4 +266,15 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
         return zoomEnabled ? imageViewWrapper : nil
     }
 
+}
+
+fileprivate extension UITextView {
+
+    func centerVerticalText() {
+        let fitSize = CGSize(width: bounds.width, height: CGFloat.greatestFiniteMagnitude)
+        let size = sizeThatFits(fitSize)
+        let calculate = (bounds.size.height - size.height * zoomScale) / 2
+        let offset = max(1, calculate)
+        contentOffset.y = -offset
+    }
 }

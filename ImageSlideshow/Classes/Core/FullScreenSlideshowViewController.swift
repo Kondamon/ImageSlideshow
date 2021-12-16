@@ -37,6 +37,8 @@ open class FullScreenSlideshowViewController: UIViewController {
     /// Input sources to 
     open var inputs: [InputSource]?
 
+    open var texts: [String?] = []
+
     /// Background color
     open var backgroundColor = UIColor.black
 
@@ -66,7 +68,7 @@ open class FullScreenSlideshowViewController: UIViewController {
         slideshow.backgroundColor = backgroundColor
 
         if let inputs = inputs {
-            slideshow.setImageInputs(inputs)
+            slideshow.setImageInputs(inputs, texts: texts)
         }
 
         view.addSubview(slideshow)
