@@ -397,6 +397,7 @@ open class ImageSlideshow: UIView {
             scrollViewImages = scImages
         } else {
             scrollViewImages = images
+            scrollViewTexts = texts
         }
 
         reloadScrollView()
