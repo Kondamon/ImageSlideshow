@@ -12,29 +12,19 @@ let package = Package(
             name: "ImageSlideshow",
             targets: ["ImageSlideshow"]),
         .library(
-            name: "ImageSlideshow/Alamofire",
-            targets: ["ImageSlideshowAlamofire"]),
-        .library(
-            name: "ImageSlideshow/SDWebImage",
-            targets: ["ImageSlideshowSDWebImage"]),
-        .library(
             name: "ImageSlideshow/Kingfisher",
             targets: ["ImageSlideshowKingfisher"])
     ],
     dependencies: [
         .package(url: "https://github.com/onevcat/Kingfisher.git", from: "7.0.0"),
-        .package(url: "https://github.com/Alamofire/AlamofireImage.git", from: "4.0.0"),
-        .package(url: "https://github.com/SDWebImage/SDWebImage.git", from: "5.1.0")
     ],
     targets: [
         .target(
             name: "ImageSlideshow",
             path: "ImageSlideshow",
             exclude: ["Classes/InputSources/AFURLSource.swift",
-                      "Classes/InputSources/AlamofireSource.swift",
                       "Classes/InputSources/ParseSource.swift",
-                      "Classes/InputSources/KingfisherSource.swift",
-                      "Classes/InputSources/SDWebImageSource.swift"],
+                      "Classes/InputSources/KingfisherSource.swift"],
             sources: [
                 "Classes/Core/ActivityIndicator.swift",
                 "Classes/Core/Bundle+Module.swift",
@@ -54,30 +44,10 @@ let package = Package(
                 .copy("Assets/ic_cross_white@3x.png"),
             ]),
         .target(
-            name: "ImageSlideshowAlamofire",
-            dependencies: ["ImageSlideshow", "AlamofireImage"],
-            path: "ImageSlideshow/Classes/InputSources",
-            exclude: ["AFURLSource.swift",
-                      "KingfisherSource.swift",
-                      "ParseSource.swift",
-                      "SDWebImageSource.swift"],
-            sources: ["AlamofireSource.swift"]),
-        .target(
-            name: "ImageSlideshowSDWebImage",
-            dependencies: ["ImageSlideshow", "SDWebImage"],
-            path: "ImageSlideshow/Classes/InputSources",
-            exclude: ["AFURLSource.swift",
-                      "AlamofireSource.swift",
-                      "KingfisherSource.swift",
-                      "ParseSource.swift"],            
-            sources: ["SDWebImageSource.swift"]),
-        .target(
             name: "ImageSlideshowKingfisher",
             dependencies: ["ImageSlideshow", "Kingfisher"],
             path: "ImageSlideshow/Classes/InputSources",
             exclude: ["AFURLSource.swift",
-                      "AlamofireSource.swift",
-                      "SDWebImageSource.swift",
                       "ParseSource.swift"],              
             sources: ["KingfisherSource.swift"])
     ],
