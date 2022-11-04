@@ -237,7 +237,10 @@ class ZoomInAnimator: ZoomAnimator, UIViewControllerAnimatedTransitioning {
 
         let duration: TimeInterval = transitionDuration(using: transitionContext)
         toViewController.view.layoutIfNeeded() // get default size (without safeAreaInsets)
-        UIView.animate(withDuration: duration, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0, options: UIViewAnimationOptions.curveLinear, animations: {
+        UIView.animate(withDuration: duration, delay: 0,
+                       usingSpringWithDamping: 0.7,
+                       initialSpringVelocity: 0.1,
+                       options: UIViewAnimationOptions.curveLinear, animations: {
             fromViewController.view.alpha = 0
             
             transitionView?.frame = transitionViewFinalFrame
@@ -247,12 +250,20 @@ class ZoomInAnimator: ZoomAnimator, UIViewControllerAnimatedTransitioning {
             transitionView?.center = CGPoint(x: finalFrame.midX,
                                              y: realHeight / 2 + safeAreaHeightAndConstants)
         }, completion: {[ref = self.referenceImageView] _ in
-            fromViewController.view.alpha = 1
-            ref?.alpha = 1
-            transitionView?.removeFromSuperview()
-            transitionBackgroundView.removeFromSuperview()
+            toViewController.view.alpha = 0
             containerView.addSubview(toViewController.view)
-            transitionContext.completeTransition(!transitionContext.transitionWasCancelled)
+            UIView.animate(withDuration: duration / 3, delay: 0, animations: {
+                toViewController.view.alpha = 1
+            }, completion: { _ in
+                
+                fromViewController.view.alpha = 1
+                ref?.alpha = 1
+                transitionView?.removeFromSuperview()
+                transitionBackgroundView.removeFromSuperview()
+                
+                transitionContext.completeTransition(!transitionContext.transitionWasCancelled)
+            })
+           
         })
     }
 }
