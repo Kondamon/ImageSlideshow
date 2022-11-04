@@ -26,8 +26,8 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
         return gradient
     }()
     
-    public lazy var label: UITextView = {
-        let textView = UITextView()
+    public lazy var label: CenteredBottomTextView = {
+        let textView = CenteredBottomTextView()
         textView.font = UIFont.systemFont(ofSize: 30, weight: .medium)
         textView.textColor = .white
         textView.textAlignment = .center
@@ -165,7 +165,6 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
         contentSize = imageViewWrapper.frame.size
         maximumZoomScale = calculateMaximumScale()
         
-        label.centerBottomText(margin: 0)
         imageOverlayGradientLayer.isHidden = label.text.isEmpty
         if #available(iOS 13.0, *) {
             updateFontsAndMargins()
@@ -175,9 +174,9 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
     @available(iOS 13.0, *)
     private func updateFontsAndMargins() {
         let generator = ItemSettingGenerator()
-        let settings = generator.getSettings(self.frame.size, mode: .element)
+        let settings = generator.getSettings(self.imageView.bounds.size, mode: .element)
         label.font = settings.titleFont
-        label.centerBottomText(margin: settings.margins.bottom)
+        // label.centerBottomText(margin: settings.margins.bottom)
         label.textContainerInset.left = settings.margins.left
         label.textContainerInset.right = settings.margins.right
     }
@@ -304,5 +303,24 @@ fileprivate extension UITextView {
         let calculate = (bounds.size.height - size.height * zoomScale)
         let offset = max(1, calculate)
         contentOffset.y = -offset + margin
+    }
+}
+
+public class CenteredBottomTextView: UITextView {
+    public override var contentSize: CGSize {
+        didSet {
+            setBottomContentInset()
+        }
+    }
+    
+    public override func layoutSubviews() {
+        super.layoutSubviews()
+        setBottomContentInset()
+    }
+    
+    private func setBottomContentInset() {
+        var topCorrection = (bounds.size.height - contentSize.height * zoomScale)
+        topCorrection = max(0, topCorrection)
+        contentInset = UIEdgeInsets(top: topCorrection, left: 0, bottom: 0, right: 0)
     }
 }

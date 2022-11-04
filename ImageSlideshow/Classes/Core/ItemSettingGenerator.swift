@@ -28,7 +28,7 @@ struct ItemSettingGenerator {
     
     //swiftlint:disable function_body_length
     func getSettings(_ visionElementSize: CGSize, mode: Mode) -> Setting {
-        let hasIpadScreen = UIScreen.main.bounds.width > 500
+        let hasIpadScreen = visionElementSize.width > 500
         switch mode {
         case .fullScreen:
             return Setting(titleFont: UIFont.scaled(sfPro: .xlargeTitle, .bold),
