@@ -11,7 +11,7 @@ import UIKit
 @objcMembers
 open class ZoomAnimatedTransitioningDelegate: NSObject, UIViewControllerTransitioningDelegate {
     /// parent image view used for animated transition
-    open var referenceImageView: UIImageView?
+    open weak var referenceImageView: UIImageView?
     /// parent slideshow view used for animated transition
     open weak var referenceSlideshowView: ImageSlideshow?
 
@@ -330,7 +330,9 @@ class ZoomOutAnimator: ZoomAnimator, UIViewControllerAnimatedTransitioning {
         transitionView.frame = transitionViewInitialFrame
         containerView.addSubview(transitionView)
         fromViewController.view.isHidden = true
-
+        if toViewController.view.superview == nil { // pop from navigationController
+            transitionContext.containerView.insertSubview(toViewController.view, belowSubview: fromViewController.view)
+        }
         let duration = transitionDuration(using: transitionContext)
         let animations = {
             transitionBackgroundView.alpha = 0

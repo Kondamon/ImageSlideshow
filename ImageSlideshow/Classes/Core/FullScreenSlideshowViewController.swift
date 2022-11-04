@@ -9,6 +9,9 @@ import UIKit
 
 @objcMembers
 open class FullScreenSlideshowViewController: UIViewController {
+    
+    /// Transition deelgate for custom transition (no weak)
+    open var customTransisitionDelegate: ZoomAnimatedTransitioningDelegate?
 
     open var slideshow: ImageSlideshow = {
         let slideshow = ImageSlideshow()
