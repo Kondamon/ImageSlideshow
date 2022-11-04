@@ -106,8 +106,10 @@ open class ZoomAnimatedTransitioningDelegate: NSObject, UIViewControllerTransiti
         }
     }
 
-    open func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-        if let reference = referenceSlideshowView {
+    open func animationController(forDismissed dismissed: UIViewController, referenceView: UIImageView? = nil) -> UIViewControllerAnimatedTransitioning? {
+        if let referenceView = referenceView {
+            return ZoomOutAnimator(referenceImageView: referenceView, parent: self)
+        } else if let reference = referenceSlideshowView {
             return ZoomOutAnimator(referenceSlideshowView: reference, parent: self)
         } else if let reference = referenceImageView {
             return ZoomOutAnimator(referenceImageView: reference, parent: self)
@@ -234,11 +236,16 @@ class ZoomInAnimator: ZoomAnimator, UIViewControllerAnimatedTransitioning {
         }
 
         let duration: TimeInterval = transitionDuration(using: transitionContext)
-
+        toViewController.view.layoutIfNeeded() // get default size (without safeAreaInsets)
         UIView.animate(withDuration: duration, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0, options: UIViewAnimationOptions.curveLinear, animations: {
             fromViewController.view.alpha = 0
+            
             transitionView?.frame = transitionViewFinalFrame
-            transitionView?.center = CGPoint(x: finalFrame.midX, y: finalFrame.midY)
+            let safeAreaHeightInsets = fromViewController.view.safeAreaInsets.top + fromViewController.view.safeAreaInsets.bottom
+            let realHeight = (toViewController.slideshow.slideshowItems.first?.frame.height ?? 1000) - safeAreaHeightInsets
+            let safeAreaHeightAndConstants = fromViewController.view.safeAreaInsets.top + toViewController.slideshow.frame.minY
+            transitionView?.center = CGPoint(x: finalFrame.midX,
+                                             y: realHeight / 2 + safeAreaHeightAndConstants)
         }, completion: {[ref = self.referenceImageView] _ in
             fromViewController.view.alpha = 1
             ref?.alpha = 1

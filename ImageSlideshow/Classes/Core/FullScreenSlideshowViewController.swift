@@ -105,6 +105,7 @@ open class FullScreenSlideshowViewController: UIViewController {
     }
 
     open override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
         if !isBeingDismissed {
             let safeAreaInsets: UIEdgeInsets
             if #available(iOS 11.0, *) {
