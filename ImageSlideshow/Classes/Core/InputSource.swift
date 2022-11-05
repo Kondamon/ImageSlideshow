@@ -23,6 +23,12 @@ import UIKit
      - parameter imageView: Image view that is loading the image
     */
     @objc optional func cancelLoad(on imageView: UIImageView)
+    
+    /**
+     Option to display a view instead off an image.
+     - Returns: Any UIView to be displayed or nil
+     */
+    @objc optional func getView() -> UIView?
 }
 
 /// Input Source to load plain UIImage

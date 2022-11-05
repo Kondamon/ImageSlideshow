@@ -14,6 +14,8 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
     /// Image view to hold the image
     public let imageView = UIImageView()
     
+    public private(set) var customView: UIView?
+    
     /// To be able to better see text
     private lazy var imageOverlayGradientLayer: CAGradientLayer = {
         let gradient = CAGradientLayer()
@@ -89,6 +91,11 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
 
         super.init(frame: CGRect.null)
         imageViewWrapper.addSubview(imageView)
+        if let customView = image.getView?() {
+            self.customView = customView
+            imageViewWrapper.addSubview(customView)
+            imageViewWrapper.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        }
         imageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         imageView.isAccessibilityElement = true
         imageView.accessibilityTraits = .image
@@ -147,7 +154,9 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
         } else {
             setPictoCenter()
         }
-
+        
+        customView?.frame.size = CGSize(width: self.frame.width, height: customView?.intrinsicContentSize.height ?? 0)
+        customView?.center = CGPoint(x: imageViewWrapper.bounds.midX, y: imageViewWrapper.bounds.midY)
         self.activityIndicator?.view.center = imageViewWrapper.center
         self.label.frame = imageView.bounds
         imageOverlayGradientLayer.frame = CGRect(x: 0,
