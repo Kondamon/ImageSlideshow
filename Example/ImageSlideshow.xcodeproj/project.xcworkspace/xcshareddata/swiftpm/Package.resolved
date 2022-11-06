@@ -1,23 +1,16 @@
 {
-  "pins" : [
-    {
-      "identity" : "imageslideshow",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Kondamon/ImageSlideshow",
-      "state" : {
-        "branch" : "master",
-        "revision" : "20951976cc07ee70ace502976055f79755d3e4c7"
+  "object": {
+    "pins": [
+      {
+        "package": "Kingfisher",
+        "repositoryURL": "https://github.com/onevcat/Kingfisher.git",
+        "state": {
+          "branch": null,
+          "revision": "44e891bdb61426a95e31492a67c7c0dfad1f87c5",
+          "version": "7.4.1"
+        }
       }
-    },
-    {
-      "identity" : "kingfisher",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/onevcat/Kingfisher.git",
-      "state" : {
-        "revision" : "44e891bdb61426a95e31492a67c7c0dfad1f87c5",
-        "version" : "7.4.1"
-      }
-    }
-  ],
-  "version" : 2
+    ]
+  },
+  "version": 1
 }

@@ -224,6 +224,9 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
 
     func retryLoadImage() {
         self.loadImage()
+        guard customView != nil else { return }
+        guard let activeTextField = UIResponder.currentFirst() as? UIView else { return }
+        activeTextField.resignFirstResponder()
     }
 
     // MARK: - Image zoom & size
@@ -331,5 +334,22 @@ public class CenteredBottomTextView: UITextView {
         var topCorrection = (bounds.size.height - contentSize.height * zoomScale)
         topCorrection = max(0, topCorrection)
         contentInset = UIEdgeInsets(top: topCorrection, left: 0, bottom: 0, right: 0)
+    }
+}
+
+private extension UIResponder {
+
+    private struct Static {
+        static weak var responder: UIResponder?
+    }
+
+    static func currentFirst() -> UIResponder? {
+        Static.responder = nil
+        UIApplication.shared.sendAction(#selector(UIResponder.myTrap), to: nil, from: nil, for: nil)
+        return Static.responder
+    }
+
+    @objc private func myTrap() {
+        Static.responder = self
     }
 }
