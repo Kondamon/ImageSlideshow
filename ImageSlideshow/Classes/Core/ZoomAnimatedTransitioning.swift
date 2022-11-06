@@ -211,8 +211,15 @@ class ZoomInAnimator: ZoomAnimator, UIViewControllerAnimatedTransitioning {
         #else
         containerView.sendSubview(toBack: transitionBackgroundView)
         #endif
-
-        let finalFrame = toViewController.view.frame
+        
+        toViewController.view.layoutIfNeeded() // get default size (without safeAreaInsets)
+        let safeAreaHeightInsets = fromViewController.view.safeAreaInsets.top + fromViewController.view.safeAreaInsets.bottom
+        let realHeight = (toViewController.slideshow.slideshowItems.first?.frame.height ?? 1000) - safeAreaHeightInsets
+        let safeAreaHeightAndConstants = fromViewController.view.safeAreaInsets.top + toViewController.slideshow.frame.minY
+        let statusBarOffset: CGFloat = UIApplication.shared.isStatusBarHidden && toViewController.prefersStatusBarHidden ? 20 : 0
+        let finalFrame = CGRect(origin: CGPoint(x: 0, y: safeAreaHeightAndConstants - statusBarOffset),
+                                size: CGSize(width: toViewController.view.frame.width,
+                                             height: realHeight + statusBarOffset))
 
         var transitionView: UIImageView?
         var transitionViewFinalFrame = finalFrame
@@ -236,19 +243,14 @@ class ZoomInAnimator: ZoomAnimator, UIViewControllerAnimatedTransitioning {
         }
 
         let duration: TimeInterval = transitionDuration(using: transitionContext)
-        toViewController.view.layoutIfNeeded() // get default size (without safeAreaInsets)
         UIView.animate(withDuration: duration, delay: 0,
                        usingSpringWithDamping: 0.7,
                        initialSpringVelocity: 0.1,
                        options: UIViewAnimationOptions.curveLinear, animations: {
             fromViewController.view.alpha = 0
-            
             transitionView?.frame = transitionViewFinalFrame
-            let safeAreaHeightInsets = fromViewController.view.safeAreaInsets.top + fromViewController.view.safeAreaInsets.bottom
-            let realHeight = (toViewController.slideshow.slideshowItems.first?.frame.height ?? 1000) - safeAreaHeightInsets
-            let safeAreaHeightAndConstants = fromViewController.view.safeAreaInsets.top + toViewController.slideshow.frame.minY
             transitionView?.center = CGPoint(x: finalFrame.midX,
-                                             y: realHeight / 2 + safeAreaHeightAndConstants)
+                                             y: finalFrame.midY)
         }, completion: {[ref = self.referenceImageView] _ in
             toViewController.view.alpha = 0
             containerView.addSubview(toViewController.view)
