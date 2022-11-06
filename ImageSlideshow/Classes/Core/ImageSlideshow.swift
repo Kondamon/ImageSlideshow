@@ -151,12 +151,6 @@ open class ImageSlideshow: UIView {
     /// Input Sources loaded to slideshow
     open fileprivate(set) var images = [InputSource]()
     
-    /// Texts that are presentered in center of the images
-    open fileprivate(set) var texts = [String?]()
-    
-    /// Texts that are presentered in center of the images
-    open fileprivate(set) var scrollViewTexts = [String?]()
-
     /// Image Slideshow Items loaded to slideshow
     open fileprivate(set) var slideshowItems = [ImageSlideshowItem]()
 
@@ -330,7 +324,7 @@ open class ImageSlideshow: UIView {
         var i = 0
         for image in scrollViewImages {
             let item = ImageSlideshowItem(image: image, zoomEnabled: zoomEnabled, activityIndicator: activityIndicator?.create(), maximumScale: maximumScale)
-            item.label.text = i < scrollViewTexts.count ? scrollViewTexts[i] : ""
+            item.label.text = image.title ?? ""
             item.imageView.contentMode = contentScaleMode
             slideshowItems.append(item)
             scrollView.addSubview(item)
@@ -373,31 +367,24 @@ open class ImageSlideshow: UIView {
      - parameter inputs: Array of InputSource instances.
      - parameter texts: Texts that are displayed over images
      */
-    open func setImageInputs(_ inputs: [InputSource], texts: [String?] = []) {
+    open func setImageInputs(_ inputs: [InputSource]) {
         images = inputs
-        self.texts = texts
         pageIndicator?.numberOfPages = inputs.count
 
         // in circular mode we add dummy first and last image to enable smooth scrolling
         if circular && images.count > 1 {
             var scImages = [InputSource]()
-            var scTexts = [String?]()
 
             if let last = images.last {
                 scImages.append(last)
-                scTexts.append(texts.last ?? nil)
             }
             scImages += images
-            scTexts += texts
             if let first = images.first {
                 scImages.append(first)
-                scTexts.append(texts.first ?? nil)
             }
-            scrollViewTexts = scTexts
             scrollViewImages = scImages
         } else {
             scrollViewImages = images
-            scrollViewTexts = texts
         }
 
         reloadScrollView()

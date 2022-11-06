@@ -22,6 +22,9 @@ public class KingfisherSource: NSObject, InputSource {
 
     /// options for displaying, ie. [.transition(.fade(0.2))]
     public var options: KingfisherOptionsInfo?
+    
+    /// Title to be displayed over imageView
+    public var title: String?
 
     /// Initializes a new source with a URL
     /// - parameter url: a url to be loaded
