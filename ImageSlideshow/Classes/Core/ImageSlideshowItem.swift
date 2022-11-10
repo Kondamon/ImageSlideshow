@@ -16,32 +16,10 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
     
     public private(set) var customView: UIView?
     
-    /// To be able to better see text
-    private lazy var imageOverlayGradientLayer: CAGradientLayer = {
-        let gradient = CAGradientLayer()
-        gradient.colors = [UIColor.clear.cgColor, // top
-                           UIColor.black.withAlphaComponent(0.6).cgColor]
-
-        gradient.startPoint = CGPoint(x: 0, y: 0)
-        gradient.endPoint = CGPoint(x: 0, y: 1)
-        gradient.isHidden = true
-        return gradient
-    }()
-    
-    public lazy var label: CenteredBottomTextView = {
-        let textView = CenteredBottomTextView()
-        textView.font = UIFont.systemFont(ofSize: 30, weight: .medium)
-        textView.textColor = .white
-        textView.textAlignment = .center
-        textView.isUserInteractionEnabled = false
-        textView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        textView.backgroundColor = .clear
-        textView.isEditable = false
-        textView.isUserInteractionEnabled = false
-        textView.isSelectable = false
-        textView.textContainer.lineFragmentPadding = 0
-   
-        return textView
+    /// Text overlay over images
+    private(set) lazy var textOverlay: ImageSlideshowTextOverlay = {
+        let view = ImageSlideshowTextOverlay(frame: .zero)
+        return view
     }()
     
     /// Activity indicator shown during image loading, when nil there won't be shown any
@@ -99,7 +77,6 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
         imageView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         imageView.isAccessibilityElement = true
         imageView.accessibilityTraits = .image
-        imageView.layer.addSublayer(imageOverlayGradientLayer)
         if #available(iOS 11.0, *) {
             imageView.accessibilityIgnoresInvertColors = true
         }
@@ -122,7 +99,7 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
         if let activityIndicator = activityIndicator {
             addSubview(activityIndicator.view)
         }
-        imageView.addSubview(label)
+        imageView.addSubview(textOverlay)
         
         // tap gesture recognizer
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(ImageSlideshowItem.tapZoom))
@@ -158,11 +135,7 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
         customView?.frame.size = CGSize(width: self.frame.width, height: customView?.intrinsicContentSize.height ?? 0)
         customView?.center = CGPoint(x: imageViewWrapper.bounds.midX, y: imageViewWrapper.bounds.midY)
         self.activityIndicator?.view.center = imageViewWrapper.center
-        self.label.frame = imageView.bounds
-        imageOverlayGradientLayer.frame = CGRect(x: 0,
-                                                 y: (imageView.bounds.maxY - imageView.bounds.minY) / 2,
-                                                 width: imageView.bounds.width,
-                                                 height: imageView.bounds.height / 2)
+        self.textOverlay.frame = imageView.bounds
 
         // if self.frame was changed and zoomInInitially enabled, zoom in
         if lastFrame != frame && zoomInInitially {
@@ -173,23 +146,8 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
 
         contentSize = imageViewWrapper.frame.size
         maximumZoomScale = calculateMaximumScale()
-        
-        imageOverlayGradientLayer.isHidden = label.text.isEmpty
-        if #available(iOS 13.0, *) {
-            updateFontsAndMargins()
-        }
     }
     
-    @available(iOS 13.0, *)
-    private func updateFontsAndMargins() {
-        let generator = ItemSettingGenerator()
-        let settings = generator.getSettings(self.imageView.bounds.size, mode: .element)
-        label.font = settings.titleFont
-        // label.centerBottomText(margin: settings.margins.bottom)
-        label.textContainerInset.left = settings.margins.left
-        label.textContainerInset.right = settings.margins.right
-    }
-
     /// Request to load Image Source to Image View
     public func loadImage() {
         if self.imageView.image == nil && !isLoading {
