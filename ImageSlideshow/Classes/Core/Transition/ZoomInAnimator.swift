@@ -67,13 +67,21 @@ class ZoomInAnimator: ZoomAnimator, UIViewControllerAnimatedTransitioning, CAAni
         self.completion = { [weak containerView,
                              weak toViewController,
                              weak fromViewController,
+                             weak transitionImageTextView,
                              weak transitionBackgroundView] in
-            if let toViewController = toViewController {
-                containerView?.addSubview(toViewController.view)
-            }
-            transitionImageTextView?.removeFromSuperview()
-            fromViewController?.view.alpha = 1
-            transitionBackgroundView?.removeFromSuperview()
+            guard let toViewController = toViewController else { return }
+            toViewController.view.alpha = 0
+            containerView?.addSubview(toViewController.view)
+            
+            UIView.animate(withDuration: 0.2, delay: 0,
+                           options: .allowUserInteraction,
+                           animations: {
+                toViewController.view.alpha = 1
+            }, completion: { _ in
+                transitionImageTextView?.removeFromSuperview()
+                transitionBackgroundView?.removeFromSuperview()
+                fromViewController?.view.alpha = 1
+            })
         }
     }
     

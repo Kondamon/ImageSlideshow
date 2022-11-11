@@ -10,7 +10,7 @@ import UIKit
 class ZoomOutAnimator: ZoomAnimator, UIViewControllerAnimatedTransitioning, CAAnimationDelegate {
 
     func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
-        return 0.25
+        return 0.2 // small durations can have not finished spring animation! (frame jumps)
     }
 
     private func animationParams(using transitionContext: UIViewControllerContextTransitioning) {
@@ -70,12 +70,12 @@ class ZoomOutAnimator: ZoomAnimator, UIViewControllerAnimatedTransitioning, CAAn
         containerView.addSubview(transitionView)
         fromViewController.view.isHidden = true
         if toViewController.view.superview == nil { // pop from navigationController
-            transitionContext.containerView.insertSubview(toViewController.view, belowSubview: fromViewController.view)
+            transitionContext.containerView.insertSubview(toViewController.view,
+                                                          belowSubview: fromViewController.view)
         }
         
         animateViews(transitionContext,
                      transitionView,
-                     transitionViewFinalFrame,
                      transitionViewFinalFrame,
                      transitionBackgroundView)
         
@@ -96,9 +96,14 @@ class ZoomOutAnimator: ZoomAnimator, UIViewControllerAnimatedTransitioning, CAAn
                 fromViewController?.view.isHidden = false
             }
 
-            transitionView?.removeFromSuperview()
-            transitionBackgroundView?.removeFromSuperview()
-
+            UIView.animate(withDuration: 0.2, delay: 0,
+                           options: .allowUserInteraction,
+                           animations: {
+                transitionView?.alpha = 0
+            }, completion: { _ in
+                transitionView?.removeFromSuperview()
+                transitionBackgroundView?.removeFromSuperview()
+            })
         }
     }
 
@@ -109,18 +114,13 @@ class ZoomOutAnimator: ZoomAnimator, UIViewControllerAnimatedTransitioning, CAAn
     /// Animation of all views
     private func animateViews(_ transitionContext: UIViewControllerContextTransitioning,
                               _ transitionImageTextView: TransitionImageView?,
-                              _ finalFrame: CGRect,
                               _ transitionViewFinalFrame: CGRect,
                               _ transitionBackgroundView: UIView) {
         let duration: TimeInterval = transitionDuration(using: transitionContext)
         
         if let transitionView = transitionImageTextView {
             // Movement of image
-            let centeredInRect = CGRect(x: finalFrame.midX - transitionViewFinalFrame.width / 2,
-                                        y: finalFrame.midY - transitionViewFinalFrame.height / 2,
-                                        width: transitionViewFinalFrame.width,
-                                        height: transitionViewFinalFrame.height)
-            let group1Animation = transitionView.layer.resizeAndMove(frame: centeredInRect,
+            let group1Animation = transitionView.layer.resizeAndMove(frame: transitionViewFinalFrame,
                                                                      duration: duration,
                                                                      fillMode: .forwards)
             group1Animation.delegate = self // to call stop of transition and completion
