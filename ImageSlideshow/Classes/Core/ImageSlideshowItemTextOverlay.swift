@@ -21,6 +21,7 @@ class ImageSlideshowTextOverlay: UIView {
         textView.isUserInteractionEnabled = false
         textView.isSelectable = false
         textView.textContainer.lineFragmentPadding = 0
+        textView.layer.applyDarker2()
         
         return textView
     }()
@@ -72,5 +73,94 @@ class ImageSlideshowTextOverlay: UIView {
     
     func updateView(text: String?) {
         label.text = text
+    }
+}
+
+extension CALayer {
+    
+    public struct Settings {
+        let xPos: CGFloat
+        let yPos: CGFloat
+        let alpha: Float
+        let blur: CGFloat
+        let spread: CGFloat
+        let color: UIColor
+        
+        public init(xPos: CGFloat, yPos: CGFloat, alpha: Float, blur: CGFloat, spread: CGFloat, color: UIColor) {
+            self.xPos = xPos
+            self.yPos = yPos
+            self.alpha = alpha
+            self.blur = blur
+            self.spread = spread
+            self.color = color
+        }
+    }
+    
+    func applyDarker2() {
+        let settings = Settings(xPos: 2.0, yPos: 2.0, alpha: 0.8, blur: 9, spread: 0, color: .black)
+        applyShadow(settings)
+    }
+    
+    /// Add a H21 SketchShadowType to a view's layer. Default shadow is applied without any parameters.
+    /// - Parameters:
+    ///   - type: Shadow types
+    ///   - path: Path for shadow
+    ///   - isDarkModeEndabled: When set to true, shadow is cleared. You have to manually set dark mode enabled,
+    ///   since this can not always be correctly detected in CALayer.
+    func applyShadow(_ settings: Settings, path: UIBezierPath? = nil, isDarkModeEndabled: Bool = false) {
+        guard !isDarkModeEndabled else {
+            clearShadow()
+            return
+        }
+        applySketchShadow(color: settings.color,
+                          alpha: settings.alpha,
+                          x: settings.xPos,
+                          y: settings.yPos,
+                          blur: settings.blur,
+                          spread: settings.spread,
+                          path: path)
+    }
+    
+    // swiftlint:disable identifier_name function_parameter_count
+    /// Add shadow to a view's layer through parameters from Sketch app. Source
+    /// from [Stackoverflow](https://stackoverflow.com/a/54372639/6702020)
+    func applySketchShadow(color: UIColor,
+                           alpha: Float,
+                           x: CGFloat,
+                           y: CGFloat,
+                           blur: CGFloat,
+                           spread: CGFloat,
+                           path: UIBezierPath? = nil) {
+        shadowColor = color.cgColor
+        shadowOpacity = alpha
+        shadowRadius = blur / 2
+        if let path = path {
+            if spread == 0 {
+                shadowOffset = CGSize(width: x, height: y)
+            } else {
+                guard path.bounds.width != 0, path.bounds.height != 0 else { return }
+                let scaleX = (path.bounds.width + (spread * 2)) / path.bounds.width
+                let scaleY = (path.bounds.height + (spread * 2)) / path.bounds.height
+                
+                path.apply(CGAffineTransform(translationX: x + -spread, y: y + -spread).scaledBy(x: scaleX, y: scaleY))
+                shadowPath = path.cgPath
+            }
+        } else {
+            shadowOffset = CGSize(width: x, height: y)
+            if spread == 0 {
+                shadowPath = nil
+            } else {
+                let dx = -spread
+                let rect = bounds.insetBy(dx: dx, dy: dx)
+                shadowPath = UIBezierPath(rect: rect).cgPath
+            }
+        }
+        shouldRasterize = true
+        rasterizationScale = UIScreen.main.scale
+    }
+    
+    /// Removes all shadows
+    func clearShadow() {
+        applySketchShadow(color: .clear, alpha: 0, x: 0, y: 0, blur: 0, spread: 0)
     }
 }
