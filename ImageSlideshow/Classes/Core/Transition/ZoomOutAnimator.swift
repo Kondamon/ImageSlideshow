@@ -36,26 +36,11 @@ class ZoomOutAnimator: ZoomAnimator, UIViewControllerAnimatedTransitioning, CAAn
             transitionViewInitialFrame = fromViewController.slideshow.frame
         }
 
-        var transitionViewFinalFrame: CGRect
-        if let referenceImageView = referenceImageView {
-            referenceImageView.alpha = 0
+        let transitionViewFinalFrame = getFinalFrame(containerView,
+                                                     fromViewController,
+                                                     toViewController)
 
-            let referenceSlideshowViewFrame = containerView.convert(referenceImageView.bounds, from: referenceImageView)
-            transitionViewFinalFrame = referenceSlideshowViewFrame
-
-            // do a frame scaling when AspectFit content mode enabled
-            if fromViewController.slideshow.currentSlideshowItem?.imageView.image != nil && referenceImageView.contentMode == UIViewContentMode.scaleAspectFit {
-                transitionViewFinalFrame = containerView.convert(referenceImageView.aspectToFitFrame(), from: referenceImageView)
-            }
-
-            // fixes the problem when the referenceSlideshowViewFrame was shifted during change of the status bar hidden state
-            if UIApplication.shared.isStatusBarHidden && !toViewController.prefersStatusBarHidden && referenceSlideshowViewFrame.origin.y != parent.referenceSlideshowViewFrame?.origin.y {
-                transitionViewFinalFrame = transitionViewFinalFrame.offsetBy(dx: 0, dy: 20)
-            }
-        } else {
-            transitionViewFinalFrame = referenceSlideshowView?.frame ?? CGRect.zero
-        }
-
+        // transition views
         let transitionBackgroundView = UIView(frame: containerView.frame)
         transitionBackgroundView.backgroundColor = fromViewController.backgroundColor
         containerView.addSubview(transitionBackgroundView)
@@ -74,6 +59,7 @@ class ZoomOutAnimator: ZoomAnimator, UIViewControllerAnimatedTransitioning, CAAn
                                                           belowSubview: fromViewController.view)
         }
         
+        // animation
         animateViews(transitionContext,
                      transitionView,
                      transitionViewFinalFrame,
@@ -109,6 +95,32 @@ class ZoomOutAnimator: ZoomAnimator, UIViewControllerAnimatedTransitioning, CAAn
 
     func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
         animationParams(using: transitionContext)
+    }
+    
+    private func getFinalFrame(_ containerView: UIView,
+                                   _ fromViewController: FullScreenSlideshowViewController,
+                                   _ toViewController: UIViewController) -> CGRect {
+        var transitionViewFinalFrame: CGRect
+        if let referenceImageView = referenceImageView {
+            referenceImageView.alpha = 0
+            
+            let referenceSlideshowViewFrame = containerView.convert(referenceImageView.bounds, from: referenceImageView)
+            transitionViewFinalFrame = referenceSlideshowViewFrame
+            
+            // do a frame scaling when AspectFit content mode enabled
+            if fromViewController.slideshow.currentSlideshowItem?.imageView.image != nil && referenceImageView.contentMode == UIViewContentMode.scaleAspectFit {
+                transitionViewFinalFrame = containerView.convert(referenceImageView.aspectToFitFrame(), from: referenceImageView)
+            }
+            
+            // fixes the problem when the referenceSlideshowViewFrame was shifted during change of the status bar hidden state
+            if UIApplication.shared.isStatusBarHidden && !toViewController.prefersStatusBarHidden && referenceSlideshowViewFrame.origin.y != parent.referenceSlideshowViewFrame?.origin.y {
+                transitionViewFinalFrame = transitionViewFinalFrame.offsetBy(dx: 0, dy: 20)
+            }
+        } else {
+            transitionViewFinalFrame = referenceSlideshowView?.frame ?? CGRect.zero
+        }
+        
+        return transitionViewFinalFrame
     }
     
     /// Animation of all views
