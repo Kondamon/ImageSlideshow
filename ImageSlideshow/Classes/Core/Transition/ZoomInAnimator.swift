@@ -48,7 +48,6 @@ class ZoomInAnimator: ZoomAnimator, UIViewControllerAnimatedTransitioning, CAAni
             transitionImageTextView = TransitionImageView()
             transitionImageTextView?.image = referenceImageView.image
             transitionImageTextView?.frame = containerView.convert(referenceImageView.bounds, from: referenceImageView)
-            transitionImageTextView?.updateView(title: text)
             containerView.addSubview(transitionImageTextView!)
             transitionImageTextView?.layoutIfNeeded()
             self.parent.referenceSlideshowViewFrame = transitionImageTextView!.frame
@@ -104,19 +103,9 @@ class ZoomInAnimator: ZoomAnimator, UIViewControllerAnimatedTransitioning, CAAni
                                                                      fillMode: .forwards)
             group1Animation.delegate = self // to call stop of transition and completion
             transitionView.layer.add(group1Animation, forKey: "Resize and move view")
-            
-            // Movement of CAGradient layer (to better see text)
-            let group2Animation = transitionView.textOverlay.imageOverlayGradientLayer.resizeAndMove(frame: CGRect(x: 0,
-                                                                                                                   y: transitionViewFinalFrame.height / 2,
-                                                                                                                   width: transitionViewFinalFrame.width,
-                                                                                                                   height: transitionViewFinalFrame.height / 2),
-                                                                                                     duration: duration,
-                                                                                                     fillMode: .forwards)
-            transitionView.textOverlay.imageOverlayGradientLayer.add(group2Animation, forKey: "resize and move gradient layer")
         }
         
         transitionBackgroundView.alpha = 0
-        transitionImageTextView?.hideLabel()
         UIView.animate(withDuration: duration, delay: 0, animations: { [weak transitionBackgroundView] in
             transitionBackgroundView?.alpha = 1
         })

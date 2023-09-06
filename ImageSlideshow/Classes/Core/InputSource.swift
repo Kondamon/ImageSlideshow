@@ -11,9 +11,6 @@ import UIKit
 /// A protocol that can be adapted by different Input Source providers
 @objc public protocol InputSource {
     
-    /// Text to be displayed at image
-    @objc optional var title: String? { get set }
-    
     /**
      Load image from the source to image view.
      - parameter imageView: Image view to load the image into.
@@ -29,7 +26,7 @@ import UIKit
     @objc optional func cancelLoad(on imageView: UIImageView)
     
     /**
-     Option to display a view instead off an image.
+     Option to display an overlay over image in same size or show only this view without image (intrinsic content size required).
      - Returns: Any UIView to be displayed or nil
      */
     @objc optional func getView() -> UIView?

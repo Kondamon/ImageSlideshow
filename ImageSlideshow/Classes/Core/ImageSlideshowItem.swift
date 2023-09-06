@@ -16,12 +16,6 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
     
     public private(set) var customView: UIView?
     
-    /// Text overlay over images
-    private(set) lazy var textOverlay: ImageSlideshowTextOverlay = {
-        let view = ImageSlideshowTextOverlay(frame: .zero)
-        return view
-    }()
-    
     /// Activity indicator shown during image loading, when nil there won't be shown any
     public let activityIndicator: ActivityIndicatorView?
 
@@ -99,7 +93,6 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
         if let activityIndicator = activityIndicator {
             addSubview(activityIndicator.view)
         }
-        imageView.addSubview(textOverlay)
         
         // tap gesture recognizer
         let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(ImageSlideshowItem.tapZoom))
@@ -132,10 +125,16 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
             setPictoCenter()
         }
         
-        customView?.frame.size = CGSize(width: self.frame.width, height: customView?.intrinsicContentSize.height ?? 0)
+        let intrinsicHeight = customView?.intrinsicContentSize.height ?? 0
+        if intrinsicHeight > 0 {
+            // custom size
+            customView?.frame.size = CGSize(width: self.frame.width, height: intrinsicHeight > 0 ? intrinsicHeight : self.frame.height)
+        } else {
+            // overlay above image
+            customView?.frame.size = imageViewWrapper.frame.size
+        }
         customView?.center = CGPoint(x: imageViewWrapper.bounds.midX, y: imageViewWrapper.bounds.midY)
         self.activityIndicator?.view.center = imageViewWrapper.center
-        self.textOverlay.frame = imageView.bounds
 
         // if self.frame was changed and zoomInInitially enabled, zoom in
         if lastFrame != frame && zoomInInitially {
@@ -183,6 +182,7 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
     func retryLoadImage() {
         self.loadImage()
         guard customView != nil else { return }
+        // hides keyboard after user has given feedback
         guard let activeTextField = UIResponder.currentFirst() as? UIView else { return }
         activeTextField.resignFirstResponder()
     }
@@ -253,45 +253,6 @@ open class ImageSlideshowItem: UIScrollView, UIScrollViewDelegate {
 
     open func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         return zoomEnabled ? imageViewWrapper : nil
-    }
-
-}
-
-fileprivate extension UITextView {
-
-    func centerVerticalText() {
-        let fitSize = CGSize(width: bounds.width, height: CGFloat.greatestFiniteMagnitude)
-        let size = sizeThatFits(fitSize)
-        let calculate = (bounds.size.height - size.height * zoomScale) / 2
-        let offset = max(1, calculate)
-        contentOffset.y = -offset
-    }
-    
-    func centerBottomText(margin: CGFloat) {
-        let fitSize = CGSize(width: bounds.width, height: CGFloat.greatestFiniteMagnitude)
-        let size = sizeThatFits(fitSize)
-        let calculate = (bounds.size.height - size.height * zoomScale)
-        let offset = max(1, calculate)
-        contentOffset.y = -offset + margin
-    }
-}
-
-public class CenteredBottomTextView: UITextView {
-    public override var contentSize: CGSize {
-        didSet {
-            setBottomContentInset()
-        }
-    }
-    
-    public override func layoutSubviews() {
-        super.layoutSubviews()
-        setBottomContentInset()
-    }
-    
-    private func setBottomContentInset() {
-        var topCorrection = (bounds.size.height - contentSize.height * zoomScale)
-        topCorrection = max(0, topCorrection)
-        contentInset = UIEdgeInsets(top: topCorrection, left: 0, bottom: 0, right: 0)
     }
 }
 

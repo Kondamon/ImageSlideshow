@@ -47,7 +47,6 @@ class ZoomOutAnimator: ZoomAnimator, UIViewControllerAnimatedTransitioning, CAAn
        
         let transitionView = TransitionImageView()
         transitionView.image = fromViewController.slideshow.currentSlideshowItem?.imageView.image
-        transitionView.updateView(title: text)
         transitionView.layer.cornerRadius = 6
         transitionView.frame = transitionViewInitialFrame
         transitionView.setNeedsLayout()
@@ -137,19 +136,9 @@ class ZoomOutAnimator: ZoomAnimator, UIViewControllerAnimatedTransitioning, CAAn
                                                                      fillMode: .forwards)
             group1Animation.delegate = self // to call stop of transition and completion
             transitionView.layer.add(group1Animation, forKey: "Resize and move view")
-            
-            // Movement of CAGradient layer (to better see text)
-            let group2Animation = transitionView.textOverlay.imageOverlayGradientLayer.resizeAndMove(frame: CGRect(x: 0,
-                                                                                                                   y: transitionViewFinalFrame.height / 2,
-                                                                                                                   width: transitionViewFinalFrame.width,
-                                                                                                                   height: transitionViewFinalFrame.height / 2),
-                                                                                                     duration: duration,
-                                                                                                     fillMode: .forwards)
-            transitionView.textOverlay.imageOverlayGradientLayer.add(group2Animation, forKey: "resize and move gradient layer")
         }
         
         transitionBackgroundView.alpha = 1
-        transitionImageTextView?.hideLabel()
         UIView.animate(withDuration: duration, delay: 0, animations: { [weak transitionBackgroundView] in
             transitionBackgroundView?.alpha = 0
         })
