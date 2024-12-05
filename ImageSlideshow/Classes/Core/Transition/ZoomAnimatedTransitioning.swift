@@ -65,13 +65,15 @@ open class ZoomAnimatedTransitioningDelegate: NSObject, UIViewControllerTransiti
         guard let referenceSlideshowController = referenceSlideshowController else {
             return
         }
-
-        let percent = min(max(abs(gesture.translation(in: gesture.view!).y) / 200.0, 0.0), 1.0)
+        var percent : CGFloat = -1
+        if let view = gesture.view {
+            percent = min(max(abs(gesture.translation(in: view).y) / 200.0, 0.0), 1.0)
+        }
 
         if gesture.state == .began {
             interactionController = UIPercentDrivenInteractiveTransition()
             referenceSlideshowController.dismiss(animated: true, completion: nil)
-        } else if gesture.state == .changed {
+        } else if gesture.state == .changed && percent >= 0 {
             interactionController?.update(percent)
         } else if gesture.state == .ended || gesture.state == .cancelled || gesture.state == .failed {
             let velocity = gesture.velocity(in: referenceSlideshowView)
